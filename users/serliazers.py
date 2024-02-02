@@ -8,6 +8,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ['id', 'payment_amount', 'payment_date', 'stripe_id']
 
+
 class UserSerializer(serializers.ModelSerializer):
     '''Расширение сериализатора для вывода истории платежей user'''
     payments = PaymentSerializer(many=True)
