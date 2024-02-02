@@ -30,6 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -39,3 +40,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    paid_date = models.DateTimeField(auto_now_add=True)
+    course = models.ForeignKey('materials.Course', on_delete=models.CASCADE, null=True, blank=True)
+    lesson = models.ForeignKey('materials.Lesson', on_delete=models.CASCADE, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=50)
