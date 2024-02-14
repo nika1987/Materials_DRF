@@ -7,12 +7,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User, Payment
 from users.permissions import UserPermission
-from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer
+from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
 
 
 class UserCreateAPIView(generics.CreateAPIView):
     '''CREATE User'''
-    serializer_class = UserSerializer
+    serializer_class = UserCreateSerializer
     permission_classes = [IsAuthenticated]
 
 

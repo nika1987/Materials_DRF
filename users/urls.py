@@ -9,7 +9,6 @@ from users.views import UserCreateAPIView, UserProfileView, UserListAPIView, Use
 app_name = UsersConfig.name
 
 
-
 urlpatterns = [
     path('create_user/', UserCreateAPIView.as_view(), name='user-create'),
     path('profile/', UserProfileView.as_view(), name='user_profile'),

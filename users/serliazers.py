@@ -7,7 +7,15 @@ from users.models import User, Payment
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['id', 'payment_amount', 'payment_date', 'stripe_id']
+        fields = ['id', 'amount', 'paid_date']
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    '''Создание пользователя'''
+
+    class Meta:
+        model = User
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,8 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         '''Скрыть пароль в профиле'''
         super().__init__(*args, **kwargs)
-
-        self.fields['password'].widget = forms.HiddenInput()
+        #self.fields['password'].required = False
 
 
 class UserLimitedSerializer(serializers.ModelSerializer):
