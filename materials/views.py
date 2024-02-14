@@ -19,6 +19,9 @@ class LessonList(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
 
+    def perform_create(self, serializer):
+        serializer.save()  # Эта строка сохраняет новый урок в базе данных
+
 
 class LessonDetail(generics.RetrieveUpdateDestroyAPIView):
     '''Detail ALL Lessons, Удаление'''

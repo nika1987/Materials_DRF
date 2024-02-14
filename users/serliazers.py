@@ -1,3 +1,4 @@
+from django.forms import forms
 from rest_framework import serializers
 
 from users.models import User, Payment
@@ -17,5 +18,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        '''Скрыть пароль в профиле'''
+        super().__init__(*args, **kwargs)
 
+        self.fields['password'].widget = forms.HiddenInput()
+
+
+class UserLimitedSerializer(serializers.ModelSerializer):
+    '''Исключает отображение пароля и фамилии'''
+
+    class Meta:
+        model = User
+        exclude = ('password', 'last_name')
 
