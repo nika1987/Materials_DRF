@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.forms import forms
 from rest_framework import serializers
 
@@ -12,6 +13,11 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     '''Создание пользователя'''
+
+    def create(self, validated_data):
+        validated_data["password"] = make_password(validated_data["password"])
+        return super(UserCreateSerializer, self).create(validated_data)
+
 
     class Meta:
         model = User

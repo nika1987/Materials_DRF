@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -13,7 +14,8 @@ from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSeria
 class UserCreateAPIView(generics.CreateAPIView):
     '''CREATE User'''
     serializer_class = UserCreateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
 
 
 class UserListAPIView(generics.ListAPIView):
