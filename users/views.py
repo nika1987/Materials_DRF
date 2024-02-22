@@ -18,6 +18,7 @@ class UserCreateAPIView(generics.CreateAPIView):
 
 
 
+
 class UserListAPIView(generics.ListAPIView):
     '''READ ALL User'''
     serializer_class = UserLimitedSerializer
