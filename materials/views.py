@@ -31,10 +31,31 @@ class CourseViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
 
+class LessonViewSet(viewsets.ModelViewSet):
+    '''READ, UPDATE, DELETE Lesson'''
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [IsAuthenticated, ~IsModer]
+        elif self.action in ('update', 'partial_update', 'destroy'):
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        return super().get_permissions()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Дополнительные действия при обновлении урока, если необходимо
+
+
 class LessonCreateAPIView(generics.CreateAPIView):
     '''CREATE Lesson'''
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, IsModer]
+    permission_classes = [IsAuthenticated, ~IsModer]
 
     def perform_create(self, serializer, send_update_course=None):
         new_lesson = serializer.save(owner=self.request.user)
@@ -55,6 +76,7 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
     '''READ ONE Lesson'''
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
