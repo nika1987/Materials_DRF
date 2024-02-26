@@ -1,9 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.filters import OrderingFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from materials.models import Course, Lesson
+from materials.models import Course, Lesson, Subscription
+from materials.paginators import CoursePagination
 from materials.permissions import IsModer, IsOwner
 from materials.serliazers import CourseSerializer, LessonSerializer
 from users.models import Payment
@@ -15,6 +19,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
+    pagination_class = CoursePagination
 
     def perform_create(self, serializer, send_update_course=None):
         new_course = serializer.save(owner=self.request.user)
@@ -29,27 +34,6 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action in ('destroy',):
             self.permission_classes = [IsAuthenticated, IsOwner]
         return super().get_permissions()
-
-
-class LessonViewSet(viewsets.ModelViewSet):
-    '''READ, UPDATE, DELETE Lesson'''
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_permissions(self):
-        if self.action == 'create':
-            self.permission_classes = [IsAuthenticated, ~IsModer]
-        elif self.action in ('update', 'partial_update', 'destroy'):
-            self.permission_classes = [IsAuthenticated, IsOwner]
-        return super().get_permissions()
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
-    def perform_update(self, serializer):
-        instance = serializer.save()
-        # Дополнительные действия при обновлении урока, если необходимо
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -76,13 +60,14 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
     '''READ ONE Lesson'''
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner, IsModer]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     '''UPDATE PUT AND PATCH Lesson'''
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
     def perform_update(self, serializer, send_update_course=None):
         new_lesson = serializer.save(owner=self.request.user)
@@ -95,7 +80,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 class LessonDestroyAPIView(generics.DestroyAPIView):
     '''DELETE Lesson'''
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
 
 # Create your views here.
@@ -109,3 +94,20 @@ class PaymentListAPIView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['course', 'lesson', 'payment_method']
     ordering_fields = ['payment_date']
+
+
+class SubscriptionAPIView(APIView):
+    def post(self, request):
+        user = request.user
+        course_id = request.data.get('course_id')
+        course = get_object_or_404(Course, id=course_id)
+
+        subscription, created = Subscription.objects.get_or_create(user=user, course=course)
+
+        if not created:
+            subscription.delete()
+            message = 'Subscription removed'
+        else:
+            message = 'Subscription added'
+
+        return Response({"message": message}, status=status.HTTP_200_OK)
