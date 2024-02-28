@@ -92,7 +92,7 @@ class EducationTestCase(APITestCase):
             'owner': self.user.pk,
         }
 
-        lesson_create_url = reverse('education:lesson_create')
+        lesson_create_url = reverse('materials:lesson_create')
         response = self.client.post(lesson_create_url, data=data)
 
         self.assertEqual(
@@ -166,7 +166,7 @@ class SubscriptionTestCase(APITestCase):
 
         '''Создается тестовый курс'''
         self.course = Course.objects.create(
-            course='test course sub',
+            name='test course sub',
             description='test desc sub'
         )
 
@@ -185,7 +185,7 @@ class SubscriptionTestCase(APITestCase):
             'course': self.course.pk,
         }
 
-        subscription_url = reverse('education:subscriptions-list')
+        subscription_url = reverse('materials:subscription')
         print(subscription_url)
 
         response = self.client.post(subscription_url, data=data)
@@ -194,7 +194,7 @@ class SubscriptionTestCase(APITestCase):
 
     def test_list_subscription(self):
         '''Тест LIST Subscription'''
-        subscription_url = reverse('education:subscriptions-list')
+        subscription_url = reverse('materials:subscription')
         print(subscription_url)
         response = self.client.get(subscription_url)
         print(response.json())
