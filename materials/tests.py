@@ -33,7 +33,7 @@ class EducationTestCase(APITestCase):
         self.lesson = Lesson.objects.create(
             name='test lesson',
             description='test lesson description',
-            link_video='https://www.youtube.com/',
+            video_link='https://www.youtube.com/',
             course=self.course,
             owner=self.user
         )
@@ -60,8 +60,8 @@ class EducationTestCase(APITestCase):
         print(response.json())
 
         self.assertEqual(
-            Lesson.objects.get(pk=self.lesson.pk).title,
-            response.json().get('results')[0].get('title'))
+            Lesson.objects.get(pk=self.lesson.pk).name,
+            response.json().get('results')[0].get('name'))
 
     def test_retrieve_lesson(self):
         '''Тест READ ONE lesson'''
@@ -74,10 +74,10 @@ class EducationTestCase(APITestCase):
 
         response = response.json()
 
-        self.assertEqual(response.get('title'), 'test lesson')
+        self.assertEqual(response.get('name'), 'test lesson')
         self.assertEqual(response.get('preview'), None)
         self.assertEqual(response.get('description'), 'test lesson description')
-        self.assertEqual(response.get('link_video'), 'https://www.youtube.com/')
+        self.assertEqual(response.get('video_link'), 'https://www.youtube.com/')
         self.assertEqual(response.get('course'), self.course.pk)
         self.assertEqual(response.get('owner'), self.user.pk)
 
@@ -87,7 +87,7 @@ class EducationTestCase(APITestCase):
         data = {
             'name': 'test lesson 2',
             'description': 'description 2',
-            'link_video': 'https://www.youtube.com/',
+            'video_link': 'https://www.youtube.com/',
             'course': self.course.pk,
             'owner': self.user.pk,
         }
@@ -101,13 +101,13 @@ class EducationTestCase(APITestCase):
         print(response.json())
 
         self.assertEqual(
-            response.json().get('title'),
-            data.get('title')
+            response.json().get('name'),
+            data.get('name')
         )
 
         self.assertTrue(
-            Lesson.objects.get(pk=self.lesson.pk).title,
-            data.get('title')
+            Lesson.objects.get(pk=self.lesson.pk).name,
+            data.get('name')
         )
 
     def test_update_lesson(self):
@@ -154,9 +154,9 @@ class EducationTestCase(APITestCase):
 
 
 class SubscriptionTestCase(APITestCase):
-    '''Тест модели Subscription'''
+    ''''Тест модели Subscription'''
     def setUp(self) -> None:
-        '''Создается тестовый пользователь'''
+        ''''Создается тестовый пользователь'''
         self.user = User.objects.create(
             email='test2@mail.ru',
         )
@@ -166,7 +166,7 @@ class SubscriptionTestCase(APITestCase):
 
         '''Создается тестовый курс'''
         self.course = Course.objects.create(
-            name='test course sub',
+            course='test course sub',
             description='test desc sub'
         )
 
@@ -201,4 +201,3 @@ class SubscriptionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-# Create your tests here.

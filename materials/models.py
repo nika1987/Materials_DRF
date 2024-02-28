@@ -1,3 +1,4 @@
+import NULLABLE
 from django.conf import settings
 from django.db import models
 
@@ -23,7 +24,7 @@ class Lesson(models.Model):
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     video_link = models.URLField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
 
     def str(self):
         return self.name
