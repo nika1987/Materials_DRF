@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -16,11 +17,14 @@ class EducationTestCase(APITestCase):
 
     def setUp(self) -> None:
         '''Создается тестовый пользователь'''
-        self.user = User.objects.create(
-            email='test@mail.ru',
+        self.group = Group.objects.create(name='moderator')
+
+        self.user = User.objects.create_superuser(
+            email='test@mail.ru', password='555test555'
         )
-        self.user.set_password('555test555')
+        self.user.groups.add(self.group)
         self.user.save()
+
         self.client.force_authenticate(user=self.user)
 
         '''Создается тестовый курс'''
@@ -41,13 +45,6 @@ class EducationTestCase(APITestCase):
     def test_list_lesson(self):
         '''Тест READ LIST lesson'''
 
-        self.lesson = Lesson.objects.create(
-            name='list test lesson',
-            description='list lesson description',
-            course=self.course,
-            owner=self.user
-        )
-
         response = self.client.get(
             '/lesson/'
         )
@@ -61,7 +58,7 @@ class EducationTestCase(APITestCase):
 
         self.assertEqual(
             Lesson.objects.get(pk=self.lesson.pk).name,
-            response.json().get('results')[0].get('name'))
+            response.json()[0].get('name'))
 
     def test_retrieve_lesson(self):
         '''Тест READ ONE lesson'''
@@ -91,14 +88,15 @@ class EducationTestCase(APITestCase):
             'course': self.course.pk,
             'owner': self.user.pk,
         }
+        self.user.groups.remove(self.group)
 
         lesson_create_url = reverse('materials:lesson_create')
         response = self.client.post(lesson_create_url, data=data)
+        print(self.user.groups)
 
         self.assertEqual(
             response.status_code, status.HTTP_201_CREATED,
         )
-        print(response.json())
 
         self.assertEqual(
             response.json().get('name'),
@@ -116,6 +114,8 @@ class EducationTestCase(APITestCase):
         data = {
             'name': 'updated lesson',
             'description': 'updated description',
+            'video_link': 'https://www.youtube.com/',
+            'course': self.course.pk
         }
 
         response = self.client.put(
@@ -157,18 +157,25 @@ class SubscriptionTestCase(APITestCase):
     ''''Тест модели Subscription'''
     def setUp(self) -> None:
         ''''Создается тестовый пользователь'''
-        self.user = User.objects.create(
-            email='test2@mail.ru',
+        self.user = User.objects.create_superuser(
+            email='test2@mail.ru', password='777test777'
         )
-        self.user.set_password('777test777')
-        self.user.save()
         self.client.force_authenticate(user=self.user)
+
+        self.second_user = User.objects.create_user(
+            email='test@yandex.ru', password='supertestuser88')
 
         '''Создается тестовый курс'''
         self.course = Course.objects.create(
             name='test course sub',
             description='test desc sub'
         )
+
+        self.second_course = Course.objects.create(
+            name='test second course sub',
+            description='test second desc sub'
+        )
+
 
         '''Создание подписки'''
         self.subscription = Subscription.objects.create(
@@ -181,15 +188,16 @@ class SubscriptionTestCase(APITestCase):
         '''Тест CREATE Subscription'''
 
         data = {
-            'user': self.user.pk,
-            'course': self.course.pk,
+            'user': self.second_user.pk,
+            'course_id': self.second_course.pk,
         }
 
         subscription_url = reverse('materials:subscription')
-        print(subscription_url)
 
         response = self.client.post(subscription_url, data=data)
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         self.assertEqual(Subscription.objects.all().count(), 2)
 
     def test_list_subscription(self):
@@ -200,4 +208,3 @@ class SubscriptionTestCase(APITestCase):
         print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-
