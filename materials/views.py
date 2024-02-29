@@ -9,7 +9,9 @@ from rest_framework.views import APIView
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import CoursePagination
 from materials.permissions import IsModer, IsOwner
-from materials.serliazers import CourseSerializer, LessonSerializer
+from materials.serliazers import (
+    CourseSerializer, LessonSerializer,
+    SubscriptionSerializer)
 from users.models import Payment
 from users.serliazers import PaymentSerializer
 
@@ -73,8 +75,8 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
         new_lesson = serializer.save(owner=self.request.user)
         new_lesson.owner = self.request.user
         new_lesson.save()
-        if new_lesson:
-            send_update_course.delay(new_lesson.course.id)
+        # if new_lesson:
+        #     send_update_course.delay(new_lesson.course.id)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
@@ -103,11 +105,17 @@ class SubscriptionAPIView(APIView):
         course = get_object_or_404(Course, id=course_id)
 
         subscription, created = Subscription.objects.get_or_create(user=user, course=course)
-
+        print(subscription)
         if not created:
             subscription.delete()
             message = 'Subscription removed'
         else:
             message = 'Subscription added'
 
-        return Response({"message": message}, status=status.HTTP_200_OK)
+        return Response({"message": message}, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+        user = request.user
+        subscriptions = Subscription.objects.filter(user=user)
+        serializer = SubscriptionSerializer(subscriptions, many=True)
+        return Response(serializer.data)

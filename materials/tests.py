@@ -118,7 +118,7 @@ class EducationTestCase(APITestCase):
             'course': self.course.pk
         }
 
-        response = self.client.put(
+        response = self.client.get(
             f'/lesson/update/{self.lesson.pk}/', data=data,
         )
 
