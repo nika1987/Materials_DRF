@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter
@@ -14,36 +13,34 @@ from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSeria
 
 
 class UserCreateAPIView(generics.CreateAPIView):
-    '''CREATE User'''
+    """CREATE User"""
     serializer_class = UserCreateSerializer
     permission_classes = [AllowAny]
 
 
-
-
 class UserListAPIView(generics.ListAPIView):
-    '''READ ALL User'''
+    """READ ALL User"""
     serializer_class = UserLimitedSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
 
 
 class UserRetrieveAPIView(generics.RetrieveAPIView):
-     '''READ ONE User'''
-     serializer_class = UserSerializer
-     queryset = User.objects.all()
-     permission_classes = [IsAuthenticated, UserPermission]
+    """READ ONE User"""
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, UserPermission]
 
 
 class UserUpdateAPIView(generics.UpdateAPIView):
-    '''UPDATE PUT AND PATCH User'''
+    """UPDATE PUT AND PATCH User"""
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, UserPermission]
 
 
 class UserDestroyAPIView(generics.DestroyAPIView):
-    '''DELETE User'''
+    """DELETE User"""
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, UserPermission]
 
@@ -57,6 +54,7 @@ class UserProfileView(APIView):
 
 
 class TokenObtainPairView(APIView):
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -74,7 +72,7 @@ class TokenObtainPairView(APIView):
 
 
 class PaymentListAPIView(generics.ListAPIView):
-    '''READ ALL Payments, Добавлена фильтрация'''
+    """READ ALL Payments, Добавлена фильтрация"""
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 

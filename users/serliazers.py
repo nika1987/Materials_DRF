@@ -1,8 +1,8 @@
 from django.contrib.auth.hashers import make_password
-from django.forms import forms
 from rest_framework import serializers
 
 from users.models import User, Payment
+from users.services import create_payment, retrieve_payment
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    '''Создание пользователя'''
+    """Создание пользователя"""
 
     def create(self, validated_data):
         validated_data["password"] = make_password(validated_data["password"])
@@ -40,7 +40,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    '''Расширение сериализатора для вывода истории платежей user'''
+    """Расширение сериализатора для вывода истории платежей user"""
     payments = PaymentSerializer(many=True)
 
     class Meta:
@@ -48,15 +48,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        '''Скрыть пароль в профиле'''
+        """Скрыть пароль в профиле"""
         super().__init__(*args, **kwargs)
         #self.fields['password'].required = False
 
 
 class UserLimitedSerializer(serializers.ModelSerializer):
-    '''Исключает отображение пароля и фамилии'''
+    """Исключает отображение пароля и фамилии"""
 
     class Meta:
         model = User
         exclude = ('password', 'last_name')
-
