@@ -1,6 +1,14 @@
+
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.utils import timezone
+
+PAYMENT_METHOD = (
+   ('cash', 'Наличные'),
+   ('transfer', 'Перевод на счет'),
+)
 
 
 class UserManager(BaseUserManager):
@@ -43,9 +51,17 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    paid_date = models.DateTimeField(auto_now_add=True)
-    course = models.ForeignKey('materials.Course', on_delete=models.CASCADE, null=True, blank=True)
-    lesson = models.ForeignKey('materials.Lesson', on_delete=models.CASCADE, null=True, blank=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='payments', null=True, blank=True)
+    paid_date = models.DateTimeField(default=timezone.now, verbose_name='Дата оплаты')
+    course = models.ForeignKey('materials.Course', on_delete=models.CASCADE, verbose_name='Оплаченный курс', null=True, blank=True)
+    lesson = models.ForeignKey('materials.Lesson', on_delete=models.CASCADE, verbose_name='Оплаченный урок', null=True, blank=True)
+    amount = models.PositiveIntegerField(verbose_name='Сумма оплаты')
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD, verbose_name='Способ оплаты')
+    stripe_id = models.CharField(max_length=255, verbose_name='id платежа на stripe', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user} - {self.paid_date} - {self.payment_method}'
+
+    class Meta:
+        verbose_name = 'платеж'
+        verbose_name_plural = 'платежи'

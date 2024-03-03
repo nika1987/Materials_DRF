@@ -5,6 +5,7 @@ from users.models import User
 
 
 class Course(models.Model):
+    objects = None
     name = models.CharField(max_length=100)
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     description = models.TextField()
@@ -18,12 +19,14 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
+    objects = None
     name = models.CharField(max_length=100)
     description = models.TextField()
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     video_link = models.URLField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец',null=True, blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец', null=True,
+                              blank=True)
 
     def str(self):
         return self.name
@@ -34,8 +37,10 @@ class Lesson(models.Model):
 
 
 class Subscription(models.Model):
-    '''Подписки'''
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Подписка на курс', related_name='subscribe')
+    """Подписки"""
+    objects = None
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Подписка на курс',
+                               related_name='subscribe')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Подписчик')
 
     is_subscribe = models.BooleanField(default=False, verbose_name="Подписка")
@@ -46,4 +51,5 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = 'подписка'
         verbose_name_plural = 'подписки'
+
 # Create your models here.

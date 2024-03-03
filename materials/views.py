@@ -88,16 +88,6 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 # Create your views here.
 
 
-class PaymentListAPIView(generics.ListAPIView):
-    '''READ ALL Payments, Добавлена фильтрация'''
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['course', 'lesson', 'payment_method']
-    ordering_fields = ['payment_date']
-
-
 class SubscriptionAPIView(APIView):
     def post(self, request):
         user = request.user

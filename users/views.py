@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -69,3 +71,14 @@ class TokenObtainPairView(APIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         })
+
+
+class PaymentListAPIView(generics.ListAPIView):
+    '''READ ALL Payments, Добавлена фильтрация'''
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['course', 'lesson', 'payment_method']
+    ordering_fields = ['paid_date']
+    permission_classes = [IsAuthenticated]

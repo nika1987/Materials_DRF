@@ -1,12 +1,10 @@
 from django.contrib.auth.models import Group
-from django.test import TestCase
-from rest_framework.test import APITestCase
-from rest_framework import status
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from materials.models import Course, Lesson, Subscription
 from users.models import User
-
 
 '''LESSONS TESTS'''
 # ---------------------------------------------------------------
