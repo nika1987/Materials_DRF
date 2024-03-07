@@ -12,7 +12,7 @@ class Course(models.Model):
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     description = models.TextField()
 
-    def str(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -30,7 +30,7 @@ class Lesson(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец', null=True,
                               blank=True)
 
-    def str(self):
+    def __str__(self):
         return self.name
 
     class Meta:
