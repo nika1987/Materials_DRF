@@ -27,6 +27,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_course = serializer.save(owner=self.request.user)
         new_course.owner = self.request.user
         new_course.save()
+        if new_course:
+            send_update_course.delay(new_course.course.id)
 
     def get_permissions(self):
         if self.action in ('create',):
@@ -47,6 +49,8 @@ class LessonCreateAPIView(generics.CreateAPIView):
         new_lesson = serializer.save(owner=self.request.user)
         new_lesson.owner = self.request.user
         new_lesson.save()
+        if new_lesson:
+            send_update_course.delay(new_lesson.course.id)
 
 
 class LessonListAPIView(generics.ListCreateAPIView):
@@ -75,8 +79,8 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
         new_lesson = serializer.save(owner=self.request.user)
         new_lesson.owner = self.request.user
         new_lesson.save()
-        # if new_lesson:
-        #     send_update_course.delay(new_lesson.course.id)
+        if new_lesson:
+            send_update_course.delay(new_lesson.course.id)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
