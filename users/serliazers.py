@@ -33,7 +33,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         validated_data["password"] = make_password(validated_data["password"])
         return super(UserCreateSerializer, self).create(validated_data)
 
-
     class Meta:
         model = User
         fields = '__all__'
@@ -50,7 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         """Скрыть пароль в профиле"""
         super().__init__(*args, **kwargs)
-        #self.fields['password'].required = False
+        # self.fields['password'].required = False
 
 
 class UserLimitedSerializer(serializers.ModelSerializer):

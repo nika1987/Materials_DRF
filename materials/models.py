@@ -5,6 +5,8 @@ from users.models import User
 
 
 class Course(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец',
+                              null=True, blank=True)
     objects = None
     name = models.CharField(max_length=100)
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)

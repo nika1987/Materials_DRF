@@ -4,7 +4,6 @@ from rest_framework.routers import DefaultRouter
 from materials.apps import MaterialsConfig
 from materials.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, \
     LessonRetrieveAPIView, LessonUpdateAPIView, LessonDestroyAPIView, SubscriptionAPIView
-from users.views import PaymentListAPIView
 
 app_name = MaterialsConfig.name
 router = DefaultRouter()
@@ -17,8 +16,7 @@ urlpatterns = [
     path('lesson/<int:pk>/', LessonRetrieveAPIView.as_view(), name='lesson_one'),
     path('lesson/update/<int:pk>/', LessonUpdateAPIView.as_view(), name='lesson_update'),
     path('lesson/delete/<int:pk>/', LessonDestroyAPIView.as_view(), name='lesson_delete'),
-    # PAYMENT
-    path('payment/', PaymentListAPIView.as_view(), name='payment_list'),
+
     #Subscription
     path('subscription/', SubscriptionAPIView.as_view(), name='subscription'),
 ] + router.urls
