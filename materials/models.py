@@ -11,6 +11,7 @@ class Course(models.Model):
     name = models.CharField(max_length=100)
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     description = models.TextField()
+    price = models.PositiveIntegerField(null=True, verbose_name='Цена')
 
     def __str__(self):
         return self.name
@@ -18,6 +19,20 @@ class Course(models.Model):
     class Meta:
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсы'
+
+
+class CoursePayment(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Название продукта', null=True, blank=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена платежа', null=True, blank=True)
+    payment_link = models.URLField(max_length=400, verbose_name='Ссылка на оплату', null=True, blank=True)
+    payment_id = models.CharField(max_length=255, verbose_name='Идентификатор платежа', unique=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.price_amount}"
+
+    class Meta:
+        verbose_name = 'Оплата курса'
+        verbose_name_plural = 'Оплата курсов'
 
 
 class Lesson(models.Model):

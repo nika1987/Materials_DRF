@@ -49,7 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Payment(models.Model):
     objects = None
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь',related_name='payments', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='payments',
+                             null=True, blank=True)
     paid_date = models.DateTimeField(default=timezone.now, verbose_name='Дата оплаты')
     course = models.ForeignKey('materials.Course', on_delete=models.CASCADE, verbose_name='Оплаченный курс', null=True,
                                blank=True)
@@ -57,7 +58,7 @@ class Payment(models.Model):
                                blank=True)
     amount = models.PositiveIntegerField(verbose_name='Сумма оплаты')
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD, verbose_name='Способ оплаты')
-    stripe_id = models.CharField(max_length=255, verbose_name='id платежа на stripe', null=True, blank=True)
+    #stripe_id = models.CharField(max_length=255, verbose_name='id платежа на stripe', null=True, blank=True)
 
     def __str__(self):
         return f'{self.user} - {self.paid_date} - {self.payment_method}'

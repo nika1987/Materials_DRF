@@ -1,19 +1,18 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics, status
-from rest_framework.filters import OrderingFilter
+from rest_framework import viewsets, generics, status, serializers
+
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from materials.models import Course, Lesson, Subscription
+from materials.models import Course, Lesson, Subscription, CoursePayment
 from materials.paginators import CoursePagination
 from materials.permissions import IsModer, IsOwner
 from materials.serliazers import (
     CourseSerializer, LessonSerializer,
-    SubscriptionSerializer)
+    SubscriptionSerializer, CoursePaymentSerializer)
+from materials.services import get_session, create_stripe_price, create_stripe_session
 from users.models import Payment
-from users.serliazers import PaymentSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -38,6 +37,34 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action in ('destroy',):
             self.permission_classes = [IsAuthenticated, IsOwner]
         return super().get_permissions()
+
+
+class CoursePaymentApiView(generics.CreateAPIView):
+    queryset = CoursePayment.objects.all()
+    serializer_class = CoursePaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        paid_of_course = serializer.save()
+        payment_link = get_session(paid_of_course)
+        paid_of_course.payment_link = payment_link
+        paid_of_course.save()
+
+
+class CoursePaymentApiView(generics.CreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = CoursePaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        course = serializer.validated_data.get('name')
+        if not course:
+            raise serializers.ValidationError('Укажите курс')
+
+        payment = serializer.save()
+        stripe_price_id = create_stripe_price(payment)
+        payment.payment_link, payment.payment_id = create_stripe_session(stripe_price_id)
+        payment.save()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):

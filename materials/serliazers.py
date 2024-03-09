@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from materials.models import Course, Lesson, Subscription
+from materials.models import Course, Lesson, Subscription, CoursePayment
 from materials.validators import YoutubeLinkValidator
 
 
@@ -22,6 +22,11 @@ class CourseSerializer(serializers.ModelSerializer):
             return Subscription.objects.filter(course=obj, user=user).exists()
         return False
 
+
+class CoursePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CoursePayment
+        fields = '__all__'
 
 class LessonSerializer(serializers.ModelSerializer):
     video_link = serializers.CharField(validators=[YoutubeLinkValidator(field='video_link')])
