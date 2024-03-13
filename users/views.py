@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User, Payment
 from users.permissions import UserPermission
 from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
+from users.services import get_session, create_stripe_price, create_stripe_session
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -80,3 +81,19 @@ class PaymentListAPIView(generics.ListAPIView):
     filterset_fields = ['course', 'lesson', 'payment_method']
     ordering_fields = ['paid_date']
     permission_classes = [IsAuthenticated]
+
+
+class PaymentCreateApiView(generics.CreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        course = serializer.validated_data.get('name')
+        if not course:
+            raise serializers.ValidationError('Укажите курс')
+
+        payment = serializer.save()
+        stripe_price_id = create_stripe_price(payment)
+        payment.payment_link, payment.payment_id = create_stripe_session(stripe_price_id)
+        payment.save()
