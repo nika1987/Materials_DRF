@@ -54,24 +54,6 @@ class UserProfileView(APIView):
         return Response({'message': 'История платежей пользователя'})
 
 
-class TokenObtainPairView(APIView):
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            return Response({'error': 'Invalid credentials'}, status=400)
-
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        })
-
-
 class PaymentListAPIView(generics.ListAPIView):
     """READ ALL Payments, Добавлена фильтрация"""
     queryset = Payment.objects.all()

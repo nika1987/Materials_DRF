@@ -10,6 +10,7 @@ from materials.permissions import IsModer, IsOwner
 from materials.serliazers import (
     CourseSerializer, LessonSerializer,
     SubscriptionSerializer)
+from materials.tasks import send_update_course
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -19,7 +20,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     pagination_class = CoursePagination
 
-    def perform_create(self, serializer, send_update_course=True):
+    def perform_create(self, serializer):
         new_course = serializer.save(owner=self.request.user)
         new_course.owner = self.request.user
         new_course.save()
