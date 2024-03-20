@@ -1,5 +1,4 @@
-from rest_framework import viewsets, generics, status, serializers
-
+from rest_framework import viewsets, generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,13 +13,13 @@ from materials.serliazers import (
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    '''READ ALL Courses, Создание'''
+    """READ ALL Courses, Создание"""
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = CoursePagination
 
-    def perform_create(self, serializer, send_update_course=None):
+    def perform_create(self, serializer, send_update_course=True):
         new_course = serializer.save(owner=self.request.user)
         new_course.owner = self.request.user
         new_course.save()
@@ -38,7 +37,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
-    '''CREATE Lesson'''
+    """CREATE Lesson"""
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, ~IsModer]
 
@@ -51,7 +50,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
 
 
 class LessonListAPIView(generics.ListCreateAPIView):
-    '''READ ALL Lessons, Создание'''
+    """READ ALL Lessons, Создание"""
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
 
@@ -60,14 +59,14 @@ class LessonListAPIView(generics.ListCreateAPIView):
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
-    '''READ ONE Lesson'''
+    """READ ONE Lesson"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner, IsModer]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
-    '''UPDATE PUT AND PATCH Lesson'''
+    """UPDATE PUT AND PATCH Lesson"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner | IsModer]
@@ -81,7 +80,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
-    '''DELETE Lesson'''
+    """DELETE Lesson"""
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
 
@@ -89,24 +88,28 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 # Create your views here.
 
 
+def post(request):
+    user = request.user
+    course_id = request.data.get('course_id')
+    course = get_object_or_404(Course, id=course_id)
+
+    subscription, created = Subscription.objects.get_or_create(user=user, course=course)
+    print(subscription)
+    if not created:
+        subscription.delete()
+        message = 'Subscription removed'
+    else:
+        message = 'Subscription added'
+
+    return Response({"message": message}, status=status.HTTP_201_CREATED)
+
+
+def get(request):
+    user = request.user
+    subscriptions = Subscription.objects.filter(user=user)
+    serializer = SubscriptionSerializer(subscriptions, many=True)
+    return Response(serializer.data)
+
+
 class SubscriptionAPIView(APIView):
-    def post(self, request):
-        user = request.user
-        course_id = request.data.get('course_id')
-        course = get_object_or_404(Course, id=course_id)
-
-        subscription, created = Subscription.objects.get_or_create(user=user, course=course)
-        print(subscription)
-        if not created:
-            subscription.delete()
-            message = 'Subscription removed'
-        else:
-            message = 'Subscription added'
-
-        return Response({"message": message}, status=status.HTTP_201_CREATED)
-
-    def get(self, request):
-        user = request.user
-        subscriptions = Subscription.objects.filter(user=user)
-        serializer = SubscriptionSerializer(subscriptions, many=True)
-        return Response(serializer.data)
+    pass

@@ -161,23 +161,22 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+# CELERY
 # URL-адрес брокера сообщений
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-
+CELERY_BROKER_URL = 'redis://redis:6379/0'  # 'redis://127.0.0.1:6379/0' for hm_drf
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+# Отслеживание задач CELERY
+CELERY_TASK_TRACK_STARTED = True
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+# Часовой пояс для работы Celery
+#CELERY_TIMEZONE = "Australia/Tasmania"
 
-# Настройки для Celery
+# CELERY_BEAT
 CELERY_BEAT_SCHEDULE = {
-    'task-name': {
-        'task': 'courses.tasks.send_mail_about_updates',
-        'schedule': timedelta(minutes=1),
+    'user_activity_check': {
+        'task': 'users.tasks.user_activity_check',
+        'schedule': timedelta(minutes=10),
     },
 }
-
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/New_York'
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60

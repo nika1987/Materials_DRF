@@ -67,7 +67,7 @@ class EducationTestCase(APITestCase):
             response.status_code, status.HTTP_200_OK,
         )
 
-        response = response.json()
+        response = response
 
         self.assertEqual(response.get('name'), 'test lesson')
         self.assertEqual(response.get('preview'), None)
@@ -97,7 +97,7 @@ class EducationTestCase(APITestCase):
         )
 
         self.assertEqual(
-            response.json().get('name'),
+            response.get('name'),
             data.get('name')
         )
 
@@ -125,7 +125,7 @@ class EducationTestCase(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_200_OK,
         )
-        response = response.json()
+        response = response
 
         self.assertEqual(response.get('name'), 'updated lesson')
         self.assertEqual(response.get('description'), 'updated description')
