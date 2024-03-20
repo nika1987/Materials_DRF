@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics, status
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -89,28 +89,35 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 # Create your views here.
 
 
-def post(request):
-    user = request.user
-    course_id = request.data.get('course_id')
-    course = get_object_or_404(Course, id=course_id)
+    def post(request):
+        user = request.user
+        course_id = request.data.get('course_id')
+        course = get_object_or_404(Course, id=course_id)
 
-    subscription, created = Subscription.objects.get_or_create(user=user, course=course)
-    print(subscription)
-    if not created:
-        subscription.delete()
-        message = 'Subscription removed'
-    else:
-        message = 'Subscription added'
+        subscription, created = Subscription.objects.get_or_create(user=user, course=course)
+        print(subscription)
+        if not created:
+            subscription.delete()
+            message = 'Subscription removed'
+        else:
+            message = 'Subscription added'
 
-    return Response({"message": message}, status=status.HTTP_201_CREATED)
-
-
-def get(request):
-    user = request.user
-    subscriptions = Subscription.objects.filter(user=user)
-    serializer = SubscriptionSerializer(subscriptions, many=True)
-    return Response(serializer.data)
+        return Response({"message": message}, status=status.HTTP_201_CREATED)
 
 
-class SubscriptionAPIView(APIView):
-    pass
+    def get(request):
+        user = request.user
+        subscriptions = Subscription.objects.filter(user=user)
+        serializer = SubscriptionSerializer(subscriptions, many=True)
+        return Response(serializer.data)
+
+
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+    serializer_class = SubscriptionSerializer
+    queryset = Subscription.objects.all()
+
+    def perform_create(self, serializer):
+        new_subscription = serializer.save()
+        new_subscription.user = self.request.user
+        new_subscription.save()
