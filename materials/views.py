@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, generics, status, serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -42,7 +42,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, ~IsModer]
 
-    def perform_create(self, serializer, send_update_course=None):
+    def perform_create(self, serializer):
         new_lesson = serializer.save(owner=self.request.user)
         new_lesson.owner = self.request.user
         new_lesson.save()
@@ -72,7 +72,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
-    def perform_update(self, serializer, send_update_course=None):
+    def perform_update(self, serializer):
         new_lesson = serializer.save(owner=self.request.user)
         new_lesson.owner = self.request.user
         new_lesson.save()
@@ -85,9 +85,7 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
 
-
-# Create your views here.
-
+    # Create your views here.
 
     def post(request):
         user = request.user
@@ -104,7 +102,6 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
         return Response({"message": message}, status=status.HTTP_201_CREATED)
 
-
     def get(request):
         user = request.user
         subscriptions = Subscription.objects.filter(user=user)
@@ -112,10 +109,31 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
         return Response(serializer.data)
 
 
-class SubscriptionViewSet(viewsets.ModelViewSet):
+class SubscriptionView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SubscriptionSerializer
     queryset = Subscription.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+
+        course_id = request.data.get('course_id')
+        course = course_id.objects.get_object_or_404()
+
+        subscription = Subscription.objects.filter(owner=user, course=course, is_active=True)
+
+        if user != subscription.owner:
+            raise serializers.ValidationError('Нельзя удалить чужую подписку!')
+        else:
+            if subscription.exists():
+                subscription.delete()
+                message = 'подписка удалена'
+
+            else:
+                Subscription.objects.create(owner=user, course=course, is_active=True)
+                message = 'подписка добавлена'
+
+            return Response({"message": message}, {'user': user})
 
     def perform_create(self, serializer):
         new_subscription = serializer.save()

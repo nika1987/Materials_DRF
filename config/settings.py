@@ -146,8 +146,8 @@ REST_FRAMEWORK = {
 
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
 }
 
 STRIPE_API_KEY = ('sk_test_51NsmSjFTI05Q8zUVEiUfi3w6NZY3BFvTaOZEWe2JUnntsfbJfY5U0oz36MfRp0Uef4LAbvL0UYsJu0qjK5y0/'
