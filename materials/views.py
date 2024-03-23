@@ -20,12 +20,15 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     pagination_class = CoursePagination
 
+    def perform_update(self, serializer):
+        updated_course = serializer.save()
+        if updated_course:
+            send_update_course.delay(updated_course.id)
+
     def perform_create(self, serializer):
         new_course = serializer.save(owner=self.request.user)
         new_course.owner = self.request.user
         new_course.save()
-        if new_course:
-            send_update_course.delay(new_course.course.id)
 
     def get_permissions(self):
         if self.action in ('create',):
@@ -87,6 +90,11 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
     # Create your views here.
 
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.data = None
+        self.user = None
+
     def post(request):
         user = request.user
         course_id = request.data.get('course_id')
@@ -139,3 +147,18 @@ class SubscriptionView(APIView):
         new_subscription = serializer.save()
         new_subscription.user = self.request.user
         new_subscription.save()
+
+    def patch(self, request, *args, **kwargs):
+
+        instance = self.get_object()
+
+        subscribed_users = instance.get_subscribed_users()
+
+        # Отправляем уведомление каждому подписанному пользователю
+
+        for user in subscribed_users:
+
+            if user.email:
+                send_update_course.delay(user.email, instance.name)
+
+        return super().request(*args, **kwargs)

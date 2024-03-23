@@ -7,7 +7,7 @@ from materials.models import Course, Subscription
 
 @shared_task
 def send_update_course(course_id):
-    '''Отложенная задача - рассылка на обновления материалов курса'''
+    """Отложенная задача - рассылка на обновления материалов курса"""
     course = Course.objects.get(pk=course_id)
     course_sub = Subscription.objects.filter(course=course_id)
     for sub in course_sub:

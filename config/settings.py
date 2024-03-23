@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kluvr(_h=7so7=t2=y5&x-ml5=&wo^9h9%k#b@_4x^1-rpzy37'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -134,15 +134,15 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 REST_FRAMEWORK = {
-    #'DEFAULT_FILTER_BACKENDS': (
-        #'django_filters.rest_framework.DjangoFilterBackend',
-    #),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    #'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
-    #]
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 
 }
 SIMPLE_JWT = {
@@ -165,20 +165,28 @@ SWAGGER_SETTINGS = {
 }
 # CELERY
 # URL-адрес брокера сообщений
-CELERY_BROKER_URL = 'redis://redis:6379/0'  # 'redis://127.0.0.1:6379/0' for hm_drf
-# URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 # Отслеживание задач CELERY
 CELERY_TASK_TRACK_STARTED = True
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
 # Часовой пояс для работы Celery
-#CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TIMEZONE = "Australia/Tasmania"
 
 # CELERY_BEAT
 CELERY_BEAT_SCHEDULE = {
-    'user_activity_check': {
-        'task': 'users.tasks.user_activity_check',
-        'schedule': timedelta(minutes=10),
+    'task-name': {
+        'task': 'users.tasks.check_last_data',
+        'schedule': timedelta(days=1),
     },
 }
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.yandex.ru"
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

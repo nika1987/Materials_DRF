@@ -1,16 +1,16 @@
-from django.contrib.auth import authenticate
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, serializers
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from users.models import User, Payment
 from users.permissions import UserPermission
 from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
-from users.services import get_session, create_stripe_price, create_stripe_session
+from users.services import create_stripe_price, create_stripe_session
 
 
 class UserCreateAPIView(generics.CreateAPIView):
