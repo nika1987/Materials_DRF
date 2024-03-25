@@ -17,8 +17,11 @@ class CourseSerializer(serializers.ModelSerializer):
     lessons_count = SerializerMethodField()
 #    is_subscribed = serializers.SerializerMethodField()
 
-    def get_lessons_count(self, obj):
-        return Lesson.objects.filter(course=obj.pk).count()
+    @staticmethod
+    def get_lessons_count(obj):
+        return Lesson.objects.filter(course=obj.pk).count(
+
+        )
 
     class Meta:
         model = Course
