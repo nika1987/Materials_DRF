@@ -1,16 +1,24 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from materials.models import Course, Lesson, Subscription
 from materials.validators import YoutubeLinkValidator
 
 
-def get_lessons_count(instance):
-    return instance.lessons.count()
+#def get_lessons_count(instance):
+#    return instance.lessons.count()
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lessons_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
+# Создания поля для подсчета уроков
+#    lessons_count = serializers.SerializerMethodField()
+
+    lessons_count = SerializerMethodField()
+#    is_subscribed = serializers.SerializerMethodField()
+
+    def get_lessons_count(self, obj):
+        return Lesson.objects.filter(course=obj.pk).count()
 
     class Meta:
         model = Course
