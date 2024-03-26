@@ -49,7 +49,8 @@ class UserDestroyAPIView(generics.DestroyAPIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    @staticmethod
+    def get(request):
         # Здесь ваш код для получения истории платежей пользователя
         return Response({'message': 'История платежей пользователя'})
 
@@ -71,7 +72,7 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        course = serializer.validated_data.get('course_id')
+        course = serializer.validated_data.get('course')
         if not course:
             raise serializers.ValidationError('Укажите курс')
 

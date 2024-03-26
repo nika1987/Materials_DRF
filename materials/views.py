@@ -95,9 +95,9 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
         self.data = None
         self.user = None
 
-    def post(request):
-        user = request.user
-        course_id = request.data.get('course_id')
+    def post(self, request, *args, **kwargs):
+        user = self.user
+        course_id = self.data.get('course_id')
         course = get_object_or_404(Course, id=course_id)
 
         subscription, created = Subscription.objects.get_or_create(user=user, course=course)
@@ -110,8 +110,8 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
         return Response({"message": message}, status=status.HTTP_201_CREATED)
 
-    def get(request):
-        user = request.user
+    def get(self, request, *args, **kwargs):
+        user = self.user
         subscriptions = Subscription.objects.filter(user=user)
         serializer = SubscriptionSerializer(subscriptions, many=True)
         return Response(serializer.data)

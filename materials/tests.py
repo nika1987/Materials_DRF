@@ -7,14 +7,16 @@ from materials.models import Course, Lesson, Subscription
 from users.models import User
 
 '''LESSONS TESTS'''
+
+
 # ---------------------------------------------------------------
 
 
 class EducationTestCase(APITestCase):
-    '''Тест моделей Course и Lesson'''
+    """Тест моделей Course и Lesson"""
 
     def setUp(self) -> None:
-        '''Создается тестовый пользователь'''
+        """Создается тестовый пользователь"""
         self.group = Group.objects.create(name='moderator')
 
         self.user = User.objects.create_superuser(
@@ -41,7 +43,7 @@ class EducationTestCase(APITestCase):
         )
 
     def test_list_lesson(self):
-        '''Тест READ LIST lesson'''
+        """Тест READ LIST lesson"""
 
         response = self.client.get(
             '/lesson/'
@@ -59,7 +61,7 @@ class EducationTestCase(APITestCase):
             response.json()[0].get('name'))
 
     def test_retrieve_lesson(self):
-        '''Тест READ ONE lesson'''
+        """Тест READ ONE lesson"""
         response = self.client.get(f'/lesson/{self.lesson.pk}/')
         print(response.json())
 
@@ -77,7 +79,7 @@ class EducationTestCase(APITestCase):
         self.assertEqual(response.get('owner'), self.user.pk)
 
     def test_create_lesson(self):
-        '''Тест CREATE lesson'''
+        """Тест CREATE lesson"""
 
         data = {
             'name': 'test lesson 2',
@@ -107,7 +109,7 @@ class EducationTestCase(APITestCase):
         )
 
     def test_update_lesson(self):
-        '''Тест UPDATE lesson'''
+        """Тест UPDATE lesson"""
 
         data = {
             'name': 'updated lesson',
@@ -133,7 +135,7 @@ class EducationTestCase(APITestCase):
         self.assertEqual(response.get('owner'), self.user.pk)
 
     def test_delete_lesson(self):
-        '''Тест DELETE lesson'''
+        """Тест DELETE lesson"""
 
         response = self.client.delete(
             f'/lesson/delete/{self.lesson.pk}/',
@@ -148,13 +150,16 @@ class EducationTestCase(APITestCase):
 
 
 '''SUBSCRIPTION TESTS'''
+
+
 # ----------------------------------------------------------------
 
 
 class SubscriptionTestCase(APITestCase):
-    ''''Тест модели Subscription'''
+    """'Тест модели Subscription"""
+
     def setUp(self) -> None:
-        ''''Создается тестовый пользователь'''
+        """'Создается тестовый пользователь"""
         self.user = User.objects.create_superuser(
             email='test2@mail.ru', password='777test777'
         )
@@ -174,7 +179,6 @@ class SubscriptionTestCase(APITestCase):
             description='test second desc sub'
         )
 
-
         '''Создание подписки'''
         self.subscription = Subscription.objects.create(
             user=self.user,
@@ -183,7 +187,7 @@ class SubscriptionTestCase(APITestCase):
         )
 
     def test_create_subscription(self):
-        '''Тест CREATE Subscription'''
+        """Тест CREATE Subscription"""
 
         data = {
             'user': self.second_user.pk,
@@ -199,7 +203,7 @@ class SubscriptionTestCase(APITestCase):
         self.assertEqual(Subscription.objects.all().count(), 2)
 
     def test_list_subscription(self):
-        '''Тест LIST Subscription'''
+        """Тест LIST Subscription"""
         subscription_url = reverse('materials:subscription')
         print(subscription_url)
         response = self.client.get(subscription_url)
