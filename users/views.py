@@ -72,7 +72,8 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        course = serializer.validated_data.get('course')
+        course = serializer.validated_data.get(
+            'name')  # Получаем название курса из данных запроса
         if not course:
             raise serializers.ValidationError('Укажите курс')
 
