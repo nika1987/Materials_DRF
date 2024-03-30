@@ -89,7 +89,7 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': 'localhost',
-        'PORT': 5432
+        'PORT': 5433
     }
 }
 
@@ -169,12 +169,12 @@ CELERY_TASK_TRACK_STARTED = True
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
 # Часовой пояс для работы Celery
-CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TIMEZONE = TIME_ZONE
 
 # CELERY_BEAT
 CELERY_BEAT_SCHEDULE = {
     'task-name': {
-        'task': 'users.tasks.check_last_data',
+        'task': 'users.task.check_last_data',
         'schedule': timedelta(days=1),
     },
 }

@@ -8,7 +8,7 @@ class Course(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец',
                               null=True, blank=True)
     objects = None
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=50)
     preview = models.ImageField(upload_to='previews/', null=True, blank=True)
     description = models.TextField()
     price = models.PositiveIntegerField(null=True, verbose_name='Цена')
