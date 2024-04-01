@@ -125,8 +125,8 @@ class SubscriptionView(APIView):
     def post(self, request, *args, **kwargs):
         user = self.request.user
 
-        name_id = request.data.get('name')
-        course = name_id.objects.get_object_or_404()
+        name = request.data.get('name')
+        course = name.objects.get_object_or_404()
 
         subscription = Subscription.objects.filter(owner=user, course=course, is_active=True)
 

@@ -1,68 +1,39 @@
 import uuid
 
 import stripe
+from django.core.mail import send_mail
 
-from config.settings import STRIPE_API_KEY
+from config.settings import STRIPE_API_KEY, EMAIL_HOST_USER
 
 API_KEY = STRIPE_API_KEY
 
 
-def generate_payment_id():
-    return str(uuid.uuid4())
+def send_payment_link(url, email):
+    send_mail(
+        subject='Оплата курса',
+        message=f'Ссылка для оплаты курса: {url}',
+        from_email=EMAIL_HOST_USER,
+        recipient_list=[email]
 
-
-def get_session(payment):
-    """Функция возвращает сессию для оплаты"""
-    stripe.api_key = API_KEY
-
-    product = stripe.Product.create(
-        name=payment.name
     )
 
-    price = stripe.Price.create(
-        currency='eur',
-        unit_amount=payment.price_amount,
-        product=product.id
+
+def create_stripe_session(serializer):
+    course_title = serializer.course.title
+    stripe_product = stripe.Product.create(
+        name=course_title
     )
-
-    session = stripe.checkout.Session.create(
-        success_url="http://127.0.0.1:8000/",
-        line_items=[
-            {
-                'price': price.id,
-                'quantity': 1,
-            }
-        ],
-        mode='payment'
+    stripe_price = stripe.Price.create(
+        currency='rub',
+        unit_amount=serializer.course.price * 100,
+        recurring={"interval": "month"},
+        product=stripe_product.id
     )
-
-    return session.url
-
-# def create_stripe_price(payment):
-#    stripe.api_key = API_KEY
-
-#   stripe_product = stripe.Product.create(
-#       name=payment.paid_course.name
-#   )
-
-#   stripe_price = stripe.Price.create(
-#       currency="rub",
-#       unit_amount=payment.payment_amount * 100,
-#       product_data={"name": stripe_product.name}
-#   )
-
-#   return stripe_price.id
-
-
-# def create_stripe_session(stripe_price_id):
-#   stripe.api_key = API_KEY
-#    stripe_session = stripe.checkout.Session.create(
-#       line_items=[{
-#           'price': stripe_price_id,
-#           'quantity': 1
-#       }],
-#       mode='payment',
-#       success_url='https://example.com/success'
-#   )
-#
-#   return stripe_session.url, stripe_session.id
+    stripe_session = stripe.checkout.Session.create(
+        succes_ul="http://127.0.0.1:8000",
+        line_items=[{"price": stripe_price.id, "quantity": 1}],
+        mode="payment",
+        customer_email=serializer.user.email,
+    )
+    send_payment_link(stripe_session.url, serializer.user.email)
+    return stripe_session

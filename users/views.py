@@ -1,6 +1,6 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from users.models import User, Payment
 from users.permissions import UserPermission
 from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
-from users.services import get_session, generate_payment_id
+from users.services import get_session, generate_payment_id, create_stripe_session
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -72,11 +72,11 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        paid_of_course = serializer.save()
-        payment_link = get_session(paid_of_course)
-        paid_of_course.payment_link = payment_link
-
-        # Генерация payment_id
-        paid_of_course.payment_id = generate_payment_id()
-
-        paid_of_course.save()
+        course = serializer.validated_data.get('course')
+        if not course:
+            raise serializers.ValidationError('Course is required.')
+        payment = serializer.save()
+        payment.user = self.request.user
+        if payment.method == 'Transfer':
+            payment.payment_session = create_stripe_session(payment).id
+        payment.save()
