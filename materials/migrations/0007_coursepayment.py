@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Название продукта')),
-                ('price_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Цена платежа')),
+                ('price_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True,
+                                                     verbose_name='Цена платежа')),
                 ('payment_link', models.URLField(blank=True, max_length=400, null=True, verbose_name='Ссылка на оплату')),
                 ('payment_id', models.CharField(max_length=255, unique=True, verbose_name='Идентификатор платежа')),
             ],
