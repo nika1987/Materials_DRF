@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from users.models import User, Payment
 from users.permissions import UserPermission
 from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
-from users.services import get_session, generate_payment_id, create_stripe_session
+from users.services import create_stripe_session
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -72,8 +72,8 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        course = serializer.validated_data.get('course')
-        if not course:
+        name = serializer.validated_data.get('name')
+        if not name:
             raise serializers.ValidationError('Course is required.')
         payment = serializer.save()
         payment.user = self.request.user
