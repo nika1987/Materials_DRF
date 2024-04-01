@@ -1,8 +1,8 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,20 +10,20 @@ from rest_framework.views import APIView
 from users.models import User, Payment
 from users.permissions import UserPermission
 from users.serliazers import UserSerializer, PaymentSerializer, UserLimitedSerializer, UserCreateSerializer
-from users.services import create_stripe_price, create_stripe_session
+from users.services import get_session, generate_payment_id
 
 
 class UserCreateAPIView(generics.CreateAPIView):
     """CREATE User"""
     serializer_class = UserCreateSerializer
-    permission_classes = [AllowAny]
+    #permission_classes = [AllowAny]
 
 
 class UserListAPIView(generics.ListAPIView):
     """READ ALL User"""
     serializer_class = UserLimitedSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated, UserPermission]
 
 
 class UserRetrieveAPIView(generics.RetrieveAPIView):
@@ -72,12 +72,11 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        course = serializer.validated_data.get(
-            'name')  # Получаем название курса из данных запроса
-        if not course:
-            raise serializers.ValidationError('Укажите курс')
+        paid_of_course = serializer.save()
+        payment_link = get_session(paid_of_course)
+        paid_of_course.payment_link = payment_link
 
-        payment = serializer.save()
-        stripe_price_id = create_stripe_price(payment)
-        payment.payment_link, payment.payment_id = create_stripe_session(stripe_price_id)
-        payment.save()
+        # Генерация payment_id
+        paid_of_course.payment_id = generate_payment_id()
+
+        paid_of_course.save()

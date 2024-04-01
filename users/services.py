@@ -1,8 +1,14 @@
+import uuid
+
 import stripe
 
 from config.settings import STRIPE_API_KEY
 
 API_KEY = STRIPE_API_KEY
+
+
+def generate_payment_id():
+    return str(uuid.uuid4())
 
 
 def get_session(payment):
@@ -32,32 +38,31 @@ def get_session(payment):
 
     return session.url
 
+# def create_stripe_price(payment):
+#    stripe.api_key = API_KEY
 
-def create_stripe_price(payment):
-    stripe.api_key = API_KEY
+#   stripe_product = stripe.Product.create(
+#       name=payment.paid_course.name
+#   )
 
-    stripe_product = stripe.Product.create(
-        name=payment.paid_course.name
-    )
+#   stripe_price = stripe.Price.create(
+#       currency="rub",
+#       unit_amount=payment.payment_amount * 100,
+#       product_data={"name": stripe_product.name}
+#   )
 
-    stripe_price = stripe.Price.create(
-        currency="rub",
-        unit_amount=payment.payment_amount * 100,
-        product_data={"name": stripe_product.name}
-    )
-
-    return stripe_price.id
+#   return stripe_price.id
 
 
-def create_stripe_session(stripe_price_id):
-    stripe.api_key = API_KEY
-    stripe_session = stripe.checkout.Session.create(
-        line_items=[{
-            'price': stripe_price_id,
-            'quantity': 1
-        }],
-        mode='payment',
-        success_url='https://example.com/success'
-    )
-
-    return stripe_session.url, stripe_session.id
+# def create_stripe_session(stripe_price_id):
+#   stripe.api_key = API_KEY
+#    stripe_session = stripe.checkout.Session.create(
+#       line_items=[{
+#           'price': stripe_price_id,
+#           'quantity': 1
+#       }],
+#       mode='payment',
+#       success_url='https://example.com/success'
+#   )
+#
+#   return stripe_session.url, stripe_session.id
