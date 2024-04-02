@@ -43,7 +43,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        subscribed_users = instance.get()
+        subscribed_users = instance.get_subscribed_users()
         # Отправляем уведомление каждому подписанному пользователю
         for user in subscribed_users:
             if user.email:
