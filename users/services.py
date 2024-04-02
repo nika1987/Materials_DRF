@@ -1,5 +1,3 @@
-import uuid
-
 import stripe
 from django.core.mail import send_mail
 

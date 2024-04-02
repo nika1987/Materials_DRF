@@ -1,6 +1,7 @@
 import django_filters
 from .models import Payment
 
+
 class PaymentFilter(django_filters.FilterSet):
     paid_date = django_filters.DateFromToRangeFilter()
     course = django_filters.CharFilter(field_name='course__name', lookup_expr='icontains')

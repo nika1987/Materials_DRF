@@ -31,7 +31,6 @@ class Lesson(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Владелец', null=True,
                               blank=True)
 
-
     def __str__(self):
         return self.name
 

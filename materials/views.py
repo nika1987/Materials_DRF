@@ -1,4 +1,5 @@
-from rest_framework import viewsets, generics, status, serializers
+from django.http import Http404
+from rest_framework import viewsets, generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from materials.serliazers import (
     CourseSerializer, LessonSerializer,
     SubscriptionSerializer)
 from materials.tasks import send_update_course
+from users.serliazers import UserSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -118,39 +120,44 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
 
 class SubscriptionView(APIView):
+    queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = SubscriptionSerializer
-    queryset = Subscription.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         user = self.request.user
+        user_serializer = UserSerializer(user)
+        user_data = user_serializer.data
 
         name = request.data.get('name')
-        course = name.objects.get_object_or_404()
 
-        subscription = Subscription.objects.filter(owner=user, course=course, is_active=True)
+        if name is None:
+            return Response({"message": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if user != subscription.owner:
-            raise serializers.ValidationError('Нельзя удалить чужую подписку!')
+        try:
+            course = Course.objects.get(name=name)
+        except Course.DoesNotExist:
+            raise Http404('Course not found')
+
+        subs_item = Subscription.objects.filter(user=user, course=course)
+
+        if subs_item.exists():
+            subs_item.delete()
+            message = 'подписка удалена'
         else:
-            if subscription.exists():
-                subscription.delete()
-                message = 'подписка удалена'
+            Subscription.objects.create(user=user, course=course)
+            message = 'подписка добавлена'
 
-            else:
-                Subscription.objects.create(owner=user, course=course, is_active=True)
-                message = 'подписка добавлена'
-
-            return Response({"message": message}, {'user': user})
+        return Response({"message": message, 'user': user_data})
 
     def perform_create(self, serializer):
         new_subscription = serializer.save()
         new_subscription.user = self.request.user
         new_subscription.save()
 
-    def patch(self, request, *args, **kwargs):
+    def patch(self, request, instance=None, *args, **kwargs):
 
-        instance = self.get_object()
+        self.get_object()
 
         subscribed_users = instance.get_subscribed_users()
 
@@ -162,3 +169,7 @@ class SubscriptionView(APIView):
                 send_update_course.delay(user.email, instance.name)
 
         return super().request(*args, **kwargs)
+
+    def get_object(self):
+        # реализация метода get_object()
+        pass

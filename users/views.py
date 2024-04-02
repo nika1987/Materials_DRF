@@ -72,11 +72,11 @@ class PaymentCreateApiView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        name = serializer.validated_data.get('name')
-        if not name:
+        course = serializer.validated_data.get('course')
+        if not course:
             raise serializers.ValidationError('Course is required.')
         payment = serializer.save()
         payment.user = self.request.user
-        if payment.method == 'Transfer':
+        if payment.payment_method == 'Transfer':
             payment.payment_session = create_stripe_session(payment).id
         payment.save()

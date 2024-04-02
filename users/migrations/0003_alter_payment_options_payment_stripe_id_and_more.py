@@ -31,12 +31,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='course',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='materials.course', verbose_name='Оплаченный курс'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='materials.course', verbose_name='Оплаченный курс'),
         ),
         migrations.AlterField(
             model_name='payment',
             name='lesson',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='materials.lesson', verbose_name='Оплаченный урок'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='materials.lesson', verbose_name='Оплаченный урок'),
         ),
         migrations.AlterField(
             model_name='payment',
@@ -46,11 +48,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='payment_method',
-            field=models.CharField(choices=[('cash', 'Наличные'), ('transfer', 'Перевод на счет')], max_length=50, verbose_name='Способ оплаты'),
+            field=models.CharField(choices=[('cash', 'Наличные'), ('transfer', 'Перевод на счет')],
+                                   max_length=50, verbose_name='Способ оплаты'),
         ),
         migrations.AlterField(
             model_name='payment',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='payments', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='payments', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
         ),
     ]
