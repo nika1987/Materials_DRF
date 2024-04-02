@@ -41,6 +41,16 @@ class CourseViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated, IsOwner]
         return super().get_permissions()
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        subscribed_users = instance.get()
+        # Отправляем уведомление каждому подписанному пользователю
+        for user in subscribed_users:
+            if user.email:
+                send_update_course.delay(instance.name, user.email)
+
+        return super().update(request, *args, **kwargs)
+
 
 class LessonCreateAPIView(generics.CreateAPIView):
     """CREATE Lesson"""
@@ -154,22 +164,3 @@ class SubscriptionView(APIView):
         new_subscription = serializer.save()
         new_subscription.user = self.request.user
         new_subscription.save()
-
-    def patch(self, request, instance=None, *args, **kwargs):
-
-        self.get_object()
-
-        subscribed_users = instance.get_subscribed_users()
-
-        # Отправляем уведомление каждому подписанному пользователю
-
-        for user in subscribed_users:
-
-            if user.email:
-                send_update_course.delay(user.email, instance.name)
-
-        return super().request(*args, **kwargs)
-
-    def get_object(self):
-        # реализация метода get_object()
-        pass
